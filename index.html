@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>akxcco.exe</title>
+
+<!-- only added this for Cinzel font (used only in buttons) -->
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:#000000;
+  --card:#0f0f0f;
+  --line:#2a2a2a;
+  --text:#eaeaea;
+  --muted:#888
+}
+* {
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:monospace
+}
+body {
+  background:#000;
+  color:var(--text);
+  overflow:hidden
+}
+#bgWrap {
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  overflow:hidden
+}
+.bg {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  filter:brightness(.3) blur(12px);
+  opacity:0;
+  transition:1.2s ease
+}
+.bg.active {
+  opacity:1
+}
+.scan {
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.03),rgba(255,255,255,.03) 1px,transparent 1px,transparent 2px)
+}
+#boot {
+  position:fixed;
+  inset:0;
+  background:#000;
+  transition:.6s
+}
+#boot pre {
+  padding:20px;
+  height:100%;
+  overflow:hidden;
+  white-space:pre-wrap
+}
+#enter {
+  position:absolute;
+  bottom:60px;
+  left:50%;
+  transform:translateX(-50%) translateY(20px);
+  padding:12px 26px;
+  border:1px solid #444;
+  border-radius:14px;
+  background:#0b0b0b;
+  color:#fff;
+  opacity:0;
+  pointer-events:none;
+  transition:.6s cubic-bezier(.2,.8,.2,1);
+  cursor:pointer;
+}
+#enter.show {
+  opacity:1;
+  pointer-events:auto;
+  transform:translateX(-50%) translateY(0)
+}
+#enter:hover {
+  background:#fff;
+  color:#000;
+  transform:translateX(-50%) translateY(-2px)
+}
+#main {
+  display:none;
+  height:100vh;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  transition:1.2s
+}
+
+/* 3D card changes start here */
+.card-wrapper {
+  perspective: 1000px;
+  width: 100%;
+  max-width: 750px;
+}
+.card {
+  display:flex;
+  width:100%;
+  background:rgba(10,10,10,.92);
+  border:1px solid var(--line);
+  border-radius:18px;
+  overflow:hidden;
+  
+  transform: 
+    translateY(60px) 
+    scale(.92)
+    rotateX(0deg) 
+    rotateY(0deg);
+  
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease-out;
+  opacity:0;
+}
+.card.show {
+  transform: 
+    translateY(0) 
+    scale(1)
+    rotateX(0deg) 
+    rotateY(0deg);
+  opacity:1
+}
+
+.left {
+  width:40%;
+  position:relative
+}
+.left img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  filter:brightness(.6)
+}
+.left .overlayText {
+  position:absolute;
+  bottom:20px;
+  left:20px
+}
+.right {
+  width:60%;
+  padding:32px 28px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between
+}
+
+.buttons {
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  margin:32px 0 20px;
+  align-items:stretch;
+}
+
+.btn {
+  padding: 16px 24px 16px 20px;
+  border-radius:10px;
+  border:1px solid transparent;
+  background:linear-gradient(145deg,#1a1a1a,#0d0d0d);
+  cursor:pointer;
+  transition:.35s ease;
+  font-size:15px;
+  font-family: 'Cinzel', serif;
+  font-weight:400;
+  box-shadow:0 2px 10px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 11px;
+  background: linear-gradient(90deg, #555, #aaa, #555);
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  transition: .35s;
+}
+.btn:hover::before {
+  background: linear-gradient(90deg, #888, #ddd, #888);
+}
+
+/* ─── Changed: styling for local image icons instead of svg ─── */
+.btn-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+  min-width: 22px;
+  transition: .35s filter;
+}
+
+.btn:hover .btn-icon {
+  filter: brightness(0.7) contrast(1.2);
+}
+
+.btn span {
+  background-image: linear-gradient(90deg, #320082, #fff, #ff0000);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  transition: background-position .6s ease;
+  flex: 1;
+  text-align: center;
+}
+.btn:hover span {
+  background-position: 100% 0;
+}
+
+.btn:hover {
+  background:#5858582e;
+  transform:translateY(-3px);
+  box-shadow:0 10px 25px rgba(0,0,0,0.6);
+}
+
+#welcome {
+  font-family: 'Cinzel Decorative', 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-size: 2.1rem;
+  font-weight: 400;
+  text-align: center;
+  margin-bottom: 0;
+  letter-spacing: -0.4px;
+  line-height: 1.15;
+  color: #f5f5f5;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+}
+#welcome::before,
+#welcome::after {
+  content: '"';
+  opacity: 0.7;
+  font-size: 1.8rem;
+  vertical-align: middle;
+}
+.player {
+  margin-top:20px
+}
+.song {
+  font-size:17px;
+  color:#aaa;
+  margin-bottom:6px
+}
+.bar {
+  height:9px;
+  background:#111;
+  border-radius:10px;
+  overflow:hidden
+}
+.progress {
+  height:100%;
+  width:0;
+  background:#ffffff;
+  transition:.2s
+}
+.sticker {
+  position:fixed;
+  z-index:-1;
+  opacity:.8;
+  filter:blur(1px)
+}
+</style>
+</head>
+<body>
+<div id="bgWrap"></div>
+<div class="scan"></div>
+<div id="boot">
+<pre id="bootText"></pre>
+<div id="enter">enter</div>
+</div>
+<audio id="audio"></audio>
+<div id="main">
+  <div class="card-wrapper">
+    <div class="card" id="card">
+      <div class="left">
+        <img src="media/pfp.jpg">
+        <div class="overlayText">
+          <h2>X</h2>
+          <p id="visitLine"></p>
+        </div>
+      </div>
+      <div class="right">
+        <div>
+          <div id="welcome"></div>
+          <div class="buttons">
+            <div class="btn" onclick="go('https://www.instagram.com/akxcco/')">
+              <img src="icons/instagram.svg" alt="Instagram" class="btn-icon">
+              <span>Instagram</span>
+            </div>
+            <div class="btn" onclick="go('https://discord.com/users/1355376366098579628')">
+              <img src="icons/discord.svg" alt="Discord" class="btn-icon">
+              <span>Discord</span>
+            </div>
+            <div class="btn" onclick="go('https://open.spotify.com/user/31wesr22qvid67ruh3r7fnz2dfnq')">
+              <img src="icons/spotify.svg" alt="Spotify" class="btn-icon">
+              <span>Spotify</span>
+            </div>
+            <div class="btn" onclick="go('ex.html')">
+              <img src="icons/ex.svg" alt="?" class="btn-icon">
+              <span>????</span>
+            </div>
+          </div>
+        </div>
+        <div class="player">
+  <div style="display:flex; align-items:center; gap:10px;">
+    
+    <img id="cover" src="" 
+         style="width:45px;height:45px;border-radius:8px;object-fit:cover;">
+    
+    <div style="flex:1;">
+      <div class="song" id="songName"></div>
+      
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span id="currentTime" style="font-size:12px;color:#777;">0:00</span>
+        
+        <div class="bar" style="flex:1;height:6px;">
+          <div class="progress" id="prog"></div>
+        </div>
+        
+        <span id="duration" style="font-size:12px;color:#777;">0:00</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function fakeLocalIP() {
+  const ranges = [
+    () => `192.168.${rand()}.${rand()}`,
+    () => `10.${rand()}.${rand()}.${rand()}`,
+    () => `172.${16 + Math.floor(Math.random()*16)}.${rand()}.${rand()}`
+  ];
+  return ranges[Math.floor(Math.random()*ranges.length)]();
+}
+function rand(){ return Math.floor(Math.random()*256); }
+</script>
+
+<script>
+let v = localStorage.getItem('v') || 0
+v++
+localStorage.setItem('v', v)
+
+// correct ordinal (1st, 2nd, 3rd, etc.)
+function getOrdinal(n){
+ let s=["th","st","nd","rd"],
+  v=n%100
+ return n+(s[(v-20)%10]||s[v]||s[0])
+}
+
+// visit line variations
+const visitMsgs = [
+ "this your {v} visit",
+ "visit #{v}",
+ "you've been here {v} times",
+ "{v} visits deep",
+ "this your {v} run",
+ "you came back {v} times",
+ "visit number {v}",
+ "{v} loops in",
+ "again for the {v} time",
+ "your {v} stop here"
+]
+
+// pick random + inject number
+let visitText = visitMsgs[Math.random()*visitMsgs.length|0]
+visitText = visitText.replace("{v}", getOrdinal(v))
+
+document.getElementById('visitLine').innerText = visitText
+
+
+// your existing welcome messages (unchanged but cleaner random)
+const msgs=[
+ "welcome back","you forgot something?","again?","still here",
+ "loop again","I remember you...","never left","why return?",
+ "you again...?","again and again..","same place","nothing changed ¯\(o_o)/¯",
+ "inevitable","familiar..","not new","still watching...",
+ "back again","you came back?!","again...","i- we see you"
+]
+
+document.getElementById('welcome').innerText =
+ msgs[Math.floor(Math.random()*msgs.length)]
+let lines=[]
+for(let i=90;i<100;i++){lines.push("> loading Module - "+Math.random().toString(36).slice(2,7))}
+lines.push('')
+lines.push('> Loading successful')
+lines.push('')
+lines.push('> Logging in')
+lines.push('> Logged in as ' + fakeLocalIP())
+lines.push('')
+lines.push(`> you have been here ${v} times`)
+let el=document.getElementById('bootText')
+let i=0
+function nextLine(){
+ if(i>=lines.length){document.getElementById('enter').classList.add('show');return}
+ let t=lines[i],j=0
+if (t === 'Logging in') {
+  let dots = 0;
+  let repeats = Math.floor(Math.random() * 10) + 1; // 1 → 10 times
+  let count = 0;
+
+  function animate() {
+    el.textContent =
+      el.textContent.split('\n').slice(0, -1).join('\n') +
+      '\nLogging in' + '.'.repeat(dots + 1);
+
+    el.scrollTop = el.scrollHeight;
+
+    dots = (dots + 1) % 3;
+
+    if (dots === 0) count++; // one full cycle (., .., ...)
+
+    if (count < repeats) {
+      setTimeout(animate, 300);
+    } else {
+      el.textContent += '\n';
+      i++;
+      setTimeout(nextLine, 200);
+    }
+  }
+
+  el.textContent += '\n';
+  animate();
+  return;
+}
+ function type(){
+ function getCharDelay() {
+  let r = Math.random();
+  if (r < 0.05) return 150;    // big pause, like “thinking”
+  if (r < 0.2) return 80;      // slow
+  if (r < 0.6) return 20;      // normal
+  return 5;                     // fast
+}
+ 
+  if(j<t.length){
+   el.textContent+=t[j++]
+   el.scrollTop=el.scrollHeight
+let r = Math.random();
+let s;
+
+if (r < 0.05) {
+  s = 120; // big lag spike
+} else if (r < 0.15) {
+  s = 60; // slow
+} else if (r < 0.4) {
+  s = 10; // normal
+} else {
+  s = 2; // fast
+}
+   setTimeout(type,s)
+  } else {el.textContent+="\n";i++;setTimeout(nextLine,Math.random()*15)}
+ }
+ type()
+}
+setTimeout(nextLine,150)
+
+const songs = [
+  {
+    name: "Drowning (Slowed Remix)",
+    file: "music/Drowning (Slowed Remix).mp3",
+    cover: "music/Drowning (Slowed Remix).jpg"
+  },
+  {
+    name: "Phantom",
+    file: "music/Phantom.mp3",
+    cover: "music/Phantom.jpg"
+  },
+  {
+    name: "Keep it cool",
+    file: "music/Keep it cool.mp3",
+    cover: "music/Keep it cool.jpg"
+  }
+]
+
+/* ENTER */
+document.getElementById('enter').onclick=()=>{
+ document.getElementById('boot').style.opacity=0
+ setTimeout(()=>{
+  document.getElementById('boot').style.display='none'
+  let m=document.getElementById('main')
+  m.style.display='flex'
+  setTimeout(()=>{m.style.opacity=1;document.getElementById('card').classList.add('show')},120)
+ },500)
+let a = document.getElementById('audio')
+
+function formatTime(t){
+  let m = Math.floor(t / 60)
+  let s = Math.floor(t % 60)
+  if(s < 10) s = "0" + s
+  return m + ":" + s
+}
+
+function playRandom(){
+  let randomSong = songs[Math.floor(Math.random()*songs.length)]
+
+  a.src = randomSong.file
+  document.getElementById("songName").innerText = randomSong.name
+  document.getElementById("cover").src = randomSong.cover
+
+  a.volume = 0
+  a.play()
+
+  let fade = setInterval(()=>{
+    if(a.volume < 1) a.volume += .03
+    else clearInterval(fade)
+  },100)
+}
+
+a.addEventListener("loadedmetadata", ()=>{
+  document.getElementById("duration").innerText = formatTime(a.duration)
+})
+
+a.addEventListener("timeupdate", ()=>{
+  let p = (a.currentTime / a.duration) * 100
+  document.getElementById("prog").style.width = p + "%"
+  document.getElementById("currentTime").innerText = formatTime(a.currentTime)
+})
+
+a.addEventListener("ended", playRandom)
+
+playRandom()
+ initBG();initStickers()
+ 
+ 
+ 
+ // ─── 3D TILT ───
+ const card = document.getElementById('card');
+ const wrapper = card.parentElement;
+
+ wrapper.addEventListener('mousemove', (e) => {
+   const rect = card.getBoundingClientRect();
+   const x = e.clientX - rect.left;
+   const y = e.clientY - rect.top;
+   
+   const centerX = rect.width  / 2;
+   const centerY = rect.height / 2;
+   
+   const rotateY = ((x - centerX) / centerX) * 12;
+   const rotateX = ((y - centerY) / centerY) * -12;
+   
+   card.style.transform = `
+     translateY(0) 
+     scale(1)
+     rotateX(${rotateX}deg) 
+     rotateY(${rotateY}deg)
+   `;
+ });
+
+ wrapper.addEventListener('mouseleave', () => {
+   card.style.transform = `
+     translateY(0) 
+     scale(1)
+     rotateX(0deg) 
+     rotateY(0deg)
+   `;
+ });
+}
+
+function initBG(){
+ let files=[...Array(5).keys()].map(i=>`gifbg/bg${i+1}.gif`).concat([...Array(3).keys()].map(i=>`mp4bg/bg${i+6}.mp4`))
+ let pick=files[Math.random()*files.length|0]
+ let wrap=document.getElementById('bgWrap')
+ if(pick.endsWith('.mp4')){
+  let v=document.createElement('video');v.src=pick;v.autoplay=1;v.loop=1;v.muted=1;v.className='bg active';wrap.appendChild(v)
+ } else {
+  let i=document.createElement('img');i.src=pick;i.className='bg active';wrap.appendChild(i)
+ }
+}
+function initStickers(){
+
+ // inject CSS once
+ if(!document.getElementById('sticker-style')){
+  let style=document.createElement('style')
+  style.id='sticker-style'
+  style.innerHTML=`
+   .sticker{
+    position:absolute;
+    pointer-events:none;
+    transform-origin:top center;
+    animation:swing linear infinite;
+   }
+   @keyframes swing{
+    0%{transform:rotate(var(--base-rot)) rotate(var(--swing-min))}
+    50%{transform:rotate(var(--base-rot)) rotate(var(--swing-max))}
+    100%{transform:rotate(var(--base-rot)) rotate(var(--swing-min))}
+   }
+  `
+  document.head.appendChild(style)
+ }
+
+ let max=20
+ let images=[]
+ let loaded=0
+
+ // preload ALL first
+ for(let k=1;k<=max;k++){
+  let img=new Image()
+  img.src=`aes/s${k}.png`
+  images.push(img)
+
+  img.onload=()=>{
+   loaded++
+   if(loaded===max) spawnAll()
+  }
+ }
+
+ function spawnAll(){
+
+  let placed=[]
+
+  // center avoid zone (still allowed a bit overlap indirectly)
+  let cx=innerWidth/2
+  let cy=innerHeight/2
+  let avoidW=450
+  let avoidH=350
+
+  images.forEach(img=>{
+
+   img.className='sticker'
+   img.style.width=(60+Math.random()*80)+'px'
+
+   let baseRot=Math.random()*70-35
+   img.style.setProperty('--base-rot',baseRot+'deg')
+
+   let swingAmount=1+Math.random()*1
+   img.style.setProperty('--swing-min',-swingAmount+'deg')
+   img.style.setProperty('--swing-max',swingAmount+'deg')
+
+   // SAME start time, different phase (no snapping)
+   let duration=5+Math.random()*4
+   img.style.animationDuration=duration+'s'
+   img.style.animationDelay=-(Math.random()*duration)+'s'
+
+   let tries=0,x,y,ok
+   do{
+    ok=true
+
+    x=Math.random()*innerWidth
+    y=Math.random()*innerHeight
+
+    // softer center avoid (not fully blocked)
+    let inCenter =
+     x > cx-avoidW/2 &&
+     x < cx+avoidW/2 &&
+     y > cy-avoidH/2 &&
+     y < cy+avoidH/2
+
+    if(inCenter && Math.random()<0.7) ok=false // 70% reject → allows few inside
+
+    // REAL spacing (distance check)
+    for(let p of placed){
+     let dx=p.x-x
+     let dy=p.y-y
+     let dist=Math.sqrt(dx*dx+dy*dy)
+
+     if(dist < 120){ // spacing control
+      ok=false
+      break
+     }
+    }
+
+    tries++
+   }while(!ok && tries<50)
+
+   placed.push({x,y})
+
+   img.style.left=x+'px'
+   img.style.top=y+'px'
+   document.body.appendChild(img)
+
+  })
+ }
+}
+function go(u){window.open(u,'_blank')}
+</script>
+
+<script>
+document.addEventListener('contextmenu', function(e) {
+  e.preventDefault();
+});
+</script>
+
+
+
+</body>
+</html>
